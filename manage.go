@@ -101,21 +101,9 @@ func (server *JsonrpcServer) manageNodes() {
 			}
 			ncli := NewNodeCli(node.url, server.cfg.Cointype)
 			blockNum, err := ncli.FetchNodeBlockNum()
-			/*
-				cli, err := ethclient.Dial(node.url)
-				if err != nil {
-					node.errCount++
-					if node.errCount > 5 {
-						//删除对方节点信息
-						server.DeleteNode(i)
-					}
-					log.Error("manageNodes", "node connect err", err)
-					continue
-				}
-				blockNum, err := cli.BlockNumber(context.Background())
-			*/
-			if err != nil {
+			if err != nil || blockNum == 0 {
 				log.Error("manageNodes", "blockNum:", err)
+				server.DeleteNode(i) // 删除有问题的节点
 				continue
 			}
 			node.count++
@@ -138,12 +126,6 @@ func (server *JsonrpcServer) waitHealthNodes() {
 			}
 			ncli := NewNodeCli(node, server.cfg.Cointype)
 			blockNum, err := ncli.FetchNodeBlockNum()
-			/*
-				cli, err := ethclient.Dial(node)
-				if err != nil {
-					continue
-				}
-				blockNum, err := cli.BlockNumber(context.Background())*/
 			if err != nil {
 				log.Error("waitHealthServNodes", "blockNum:", err)
 				continue
